@@ -1,0 +1,3798 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html><head></head><body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+    
+    
+    
+    
+
+
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<h1><strong>Pulsar Star Classification Project</strong><a rel="noopener" class="anchor-link" href="#Pulsar-Star-Classification-Project">&#182;</a></h1>
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<h2><strong>Introduction</strong><a rel="noopener" class="anchor-link" href="#Introduction">&#182;</a></h2><p>This assignment aims to develop a machine learning classifier model to identify pulsar stars based on the data derived from 
+astronomical imaging. <strong>Pulsar stars</strong> are a unique form of neutron stars whose radio emissions are discernible on Earth, serving as invaluable cosmic probes for the examination of space-time and diverse states of matter. Despite their significance, distinguishing genuine pulsar signals amidst the predominant radio frequency interference and noise poses a formidable challenge.</p>
+<h2><strong>Objective</strong><a rel="noopener" class="anchor-link" href="#Objective">&#182;</a></h2><p>The core objective of this project is to construct and assess predictive models capable of discerning whether a detected signal emanates from a pulsar star or other sources such as noise and interferences. By analyzing the dataset provided, the endeavor is to capture the relationship between the descriptive features and the target feature, termed &quot;target_class&quot;, thereby facilitating the accurate classification of a star as a pulsar.</p>
+<h2><strong>Dataset Description</strong><a rel="noopener" class="anchor-link" href="#Dataset-Description">&#182;</a></h2><p>The dataset used for this project was downloaded from brightspace, I downloaded the dataset associated with my student number 17328666. The project dataset is comprised of eight continuous variables describing each candidate, bifurcated into two distinct categories. The initial four variables are derived from the integrated pulse profile, representing a longitude-resolved, time and frequency-averaged version of the signal. The latter four are extracted from the DM-SNR (Dispersion Measure-Signal to Noise Ratio) curve. These variables encapsulate the following attributes:</p>
+<ul>
+<li>Mean of the Integrated Profile: This refers to the average value of the integrated pulse profile.</li>
+<li>Standard Deviation of the Integrated Profile: It represents the extent of variation from the mean value in the integrated pulse profile.</li>
+<li>Excess Kurtosis of the Integrated Profile: This metric gauges the tailedness of the integrated pulse profile distribution.</li>
+<li>Skewness of the Integrated Profile: It measures the asymmetry in the integrated pulse profile distribution.</li>
+<li>Mean of the DM-SNR Curve: This is the average value of the DM-SNR curve.</li>
+<li>Standard Deviation of the DM-SNR Curve: It depicts the degree of variation from the mean value in the DM-SNR curve.</li>
+<li>Excess Kurtosis of the DM-SNR Curve: This metric evaluates the tailedness of the DM-SNR curve distribution.</li>
+<li>Skewness of the DM-SNR Curve: It measures the asymmetry in the DM-SNR curve distribution.</li>
+</ul>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[1]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># importing necessary modules</span>
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">from</span> <span class="nn">sklearn.feature_selection</span> <span class="kn">import</span> <span class="n">RFECV</span>
+<span class="kn">from</span> <span class="nn">sklearn.svm</span> <span class="kn">import</span> <span class="n">SVC</span>
+
+<span class="kn">import</span> <span class="nn">missingno</span> <span class="k">as</span> <span class="nn">msno</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[2]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># loading data</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;pulsar_star_17328666.csv&#39;</span><span class="p">)</span>
+<span class="n">data</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[2]:</div>
+
+
+
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult">
+<div>
+
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Mean of the integrated profile</th>
+      <th>Standard deviation of the integrated profile</th>
+      <th>Excess kurtosis of the integrated profile</th>
+      <th>Skewness of the integrated profile</th>
+      <th>Mean of the DM-SNR curve</th>
+      <th>Standard deviation of the DM-SNR curve</th>
+      <th>Excess kurtosis of the DM-SNR curve</th>
+      <th>Skewness of the DM-SNR curve</th>
+      <th>target_class</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>69.796875</td>
+      <td>39.135254</td>
+      <td>1.575813</td>
+      <td>4.686157</td>
+      <td>4.503344</td>
+      <td>28.027175</td>
+      <td>6.969244</td>
+      <td>50.088771</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>113.203125</td>
+      <td>40.798736</td>
+      <td>0.236092</td>
+      <td>0.691055</td>
+      <td>0.894649</td>
+      <td>10.383239</td>
+      <td>16.282813</td>
+      <td>332.346422</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>121.484375</td>
+      <td>46.806447</td>
+      <td>0.146787</td>
+      <td>0.248659</td>
+      <td>3.040134</td>
+      <td>18.069822</td>
+      <td>8.140009</td>
+      <td>79.899133</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>143.757812</td>
+      <td>52.193861</td>
+      <td>-0.090352</td>
+      <td>-0.566504</td>
+      <td>1.818562</td>
+      <td>13.144096</td>
+      <td>10.890333</td>
+      <td>153.854444</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>109.601562</td>
+      <td>55.037394</td>
+      <td>0.214880</td>
+      <td>-0.362173</td>
+      <td>2.529264</td>
+      <td>NaN</td>
+      <td>8.390333</td>
+      <td>NaN</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>...</th>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+      <td>...</td>
+    </tr>
+    <tr>
+      <th>9995</th>
+      <td>112.101562</td>
+      <td>53.259365</td>
+      <td>0.269043</td>
+      <td>-0.091501</td>
+      <td>2.157191</td>
+      <td>14.858599</td>
+      <td>9.889504</td>
+      <td>119.651193</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>9996</th>
+      <td>128.789062</td>
+      <td>48.736962</td>
+      <td>0.123297</td>
+      <td>-0.010218</td>
+      <td>2.989967</td>
+      <td>19.013590</td>
+      <td>9.212113</td>
+      <td>99.183431</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>9997</th>
+      <td>139.195312</td>
+      <td>47.995289</td>
+      <td>-0.052550</td>
+      <td>0.152288</td>
+      <td>2.146321</td>
+      <td>18.278535</td>
+      <td>10.086475</td>
+      <td>110.257584</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>9998</th>
+      <td>130.843750</td>
+      <td>43.493074</td>
+      <td>-0.098430</td>
+      <td>0.706602</td>
+      <td>5.115385</td>
+      <td>25.231969</td>
+      <td>5.590779</td>
+      <td>33.563135</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>9999</th>
+      <td>116.429688</td>
+      <td>49.844866</td>
+      <td>NaN</td>
+      <td>-0.131666</td>
+      <td>2.051839</td>
+      <td>15.263811</td>
+      <td>9.835660</td>
+      <td>116.081774</td>
+      <td>0</td>
+    </tr>
+  </tbody>
+</table>
+<p>10000 rows &#215; 9 columns</p>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[3]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># rename dataset columns</span>
+<span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39; Mean of the integrated profile&#39;</span><span class="p">:</span><span class="s2">&quot;mean_integrated_profile&quot;</span><span class="p">,</span>
+       <span class="s1">&#39; Standard deviation of the integrated profile&#39;</span><span class="p">:</span><span class="s2">&quot;std_deviation_integrated_profile&quot;</span><span class="p">,</span>
+       <span class="s1">&#39; Excess kurtosis of the integrated profile&#39;</span><span class="p">:</span><span class="s2">&quot;kurtosis_integrated_profile&quot;</span><span class="p">,</span>
+       <span class="s1">&#39; Skewness of the integrated profile&#39;</span><span class="p">:</span><span class="s2">&quot;skewness_integrated_profile&quot;</span><span class="p">,</span> 
+        <span class="s1">&#39; Mean of the DM-SNR curve&#39;</span><span class="p">:</span><span class="s2">&quot;mean_dm_snr_curve&quot;</span><span class="p">,</span>
+       <span class="s1">&#39; Standard deviation of the DM-SNR curve&#39;</span><span class="p">:</span><span class="s2">&quot;std_deviation_dm_snr_curve&quot;</span><span class="p">,</span>
+       <span class="s1">&#39; Excess kurtosis of the DM-SNR curve&#39;</span><span class="p">:</span><span class="s2">&quot;kurtosis_dm_snr_curve&quot;</span><span class="p">,</span>
+       <span class="s1">&#39; Skewness of the DM-SNR curve&#39;</span><span class="p">:</span><span class="s2">&quot;skewness_dm_snr_curve&quot;</span><span class="p">,</span>
+       <span class="p">})</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<h3><strong>Task 1:</strong> Prepare a data quality plan for the dataset. Mark down all the features where there  are potential problems or data quality issues. Propose solutions to deal with the problems  identified. Explain why you chose one solution over potentially many other. It is very  important to provide justification for your thinking in this part and to list potential solutions,  including the solution that will be implemented to clean the data. In particular, pay attention  to missing data and carefully address this issue. [15 marks]<a rel="noopener" class="anchor-link" href="#Task-1:-Prepare-a-data-quality-plan-for-the-dataset.-Mark-down-all-the-features-where-there--are-potential-problems-or-data-quality-issues.-Propose-solutions-to-deal-with-the-problems--identified.-Explain-why-you-chose-one-solution-over-potentially-many-other.-It-is-very--important-to-provide-justification-for-your-thinking-in-this-part-and-to-list-potential-solutions,--including-the-solution-that-will-be-implemented-to-clean-the-data.-In-particular,-pay-attention--to-missing-data-and-carefully-address-this-issue.-[15-marks]">&#182;</a></h3><p><strong>Basic Data Exploration</strong></p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[4]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># get statistical description of the dataset</span>
+<span class="n">data</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[4]:</div>
+
+
+
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult">
+<div>
+
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>mean_integrated_profile</th>
+      <th>std_deviation_integrated_profile</th>
+      <th>kurtosis_integrated_profile</th>
+      <th>skewness_integrated_profile</th>
+      <th>mean_dm_snr_curve</th>
+      <th>std_deviation_dm_snr_curve</th>
+      <th>kurtosis_dm_snr_curve</th>
+      <th>skewness_dm_snr_curve</th>
+      <th>target_class</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>count</th>
+      <td>10000.000000</td>
+      <td>10000.000000</td>
+      <td>8607.000000</td>
+      <td>10000.000000</td>
+      <td>10000.000000</td>
+      <td>9028.000000</td>
+      <td>10000.000000</td>
+      <td>9500.000000</td>
+      <td>10000.000000</td>
+    </tr>
+    <tr>
+      <th>mean</th>
+      <td>111.063741</td>
+      <td>46.524734</td>
+      <td>0.484061</td>
+      <td>1.775286</td>
+      <td>12.640597</td>
+      <td>26.390780</td>
+      <td>8.310517</td>
+      <td>104.973400</td>
+      <td>0.091900</td>
+    </tr>
+    <tr>
+      <th>std</th>
+      <td>25.693491</td>
+      <td>6.833823</td>
+      <td>1.071684</td>
+      <td>6.197844</td>
+      <td>29.576861</td>
+      <td>19.611599</td>
+      <td>4.525558</td>
+      <td>106.650347</td>
+      <td>0.288899</td>
+    </tr>
+    <tr>
+      <th>min</th>
+      <td>6.500000</td>
+      <td>24.772042</td>
+      <td>-1.738021</td>
+      <td>-1.791886</td>
+      <td>0.213211</td>
+      <td>7.370432</td>
+      <td>-3.139270</td>
+      <td>-1.976976</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>25%</th>
+      <td>100.828125</td>
+      <td>42.372586</td>
+      <td>0.024312</td>
+      <td>-0.187401</td>
+      <td>1.925585</td>
+      <td>14.420402</td>
+      <td>5.797394</td>
+      <td>35.211221</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>50%</th>
+      <td>115.101562</td>
+      <td>46.928178</td>
+      <td>0.226454</td>
+      <td>0.201928</td>
+      <td>2.818562</td>
+      <td>18.467852</td>
+      <td>8.407720</td>
+      <td>82.167904</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>75%</th>
+      <td>127.267578</td>
+      <td>50.946839</td>
+      <td>0.478182</td>
+      <td>0.940055</td>
+      <td>5.418060</td>
+      <td>28.408572</td>
+      <td>10.686814</td>
+      <td>139.009551</td>
+      <td>0.000000</td>
+    </tr>
+    <tr>
+      <th>max</th>
+      <td>185.257812</td>
+      <td>91.808628</td>
+      <td>7.879628</td>
+      <td>63.466388</td>
+      <td>222.421405</td>
+      <td>110.642211</td>
+      <td>34.539844</td>
+      <td>1191.000837</td>
+      <td>1.000000</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p><strong>Insights</strong></p>
+<p><strong>Integrated Profile Features:</strong></p>
+<ul>
+<li>Mean: The average value of the integrated profile ranges from 6.5 to 185.26 with a mean of 111.06 and a standard deviation of 25.69, suggesting a wide spread of data.</li>
+<li>Standard Deviation: With a mean of 46.52 and a standard deviation of 6.83, this feature appears to be less spread out as compared to the mean of the integrated profile.</li>
+<li>Excess Kurtosis: Exhibiting a mean of 0.48 and a standard deviation of 1.07, the excess kurtosis feature has values stretching from -1.74 to 7.88. This implies varying degrees of tailedness across the data points.</li>
+<li>Skewness: Skewness values range from -1.79 to 63.47 with a mean of 1.78 and a standard deviation of 6.20, indicating an asymmetrical distribution with a positive skew in general.</li>
+</ul>
+<p><strong>DM-SNR Curve Features:</strong></p>
+<ul>
+<li>Mean: The DM-SNR curve&#39;s mean value exhibits a broad range from 0.21 to 222.42 with an average value of 12.64 and a standard deviation of 29.58, hinting at a considerable spread of data points.</li>
+<li>Standard Deviation: With a mean of 26.39 and a standard deviation of 19.61, this feature also shows a substantial dispersion of values ranging from 7.37 to 110.64.</li>
+<li>Excess Kurtosis: The data points for excess kurtosis of the DM-SNR curve span from -3.14 to 34.54 with a mean of 8.31 and a standard deviation of 4.53, indicating a diverse range of tailedness.</li>
+<li>Skewness: This feature demonstrates a significant skew with values ranging from -1.98 to 1191.00, a mean of 104.97, and a standard deviation of 106.65. This suggests a highly asymmetrical distribution with a pronounced positive skew.</li>
+</ul>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[5]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># check null value counts and dtypes of the columns</span>
+<span class="n">data</span><span class="o">.</span><span class="n">info</span><span class="p">()</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output">
+<pre>&lt;class &#39;pandas.core.frame.DataFrame&#39;&gt;
+RangeIndex: 10000 entries, 0 to 9999
+Data columns (total 9 columns):
+ #   Column                            Non-Null Count  Dtype  
+---  ------                            --------------  -----  
+ 0   mean_integrated_profile           10000 non-null  float64
+ 1   std_deviation_integrated_profile  10000 non-null  float64
+ 2   kurtosis_integrated_profile       8607 non-null   float64
+ 3   skewness_integrated_profile       10000 non-null  float64
+ 4   mean_dm_snr_curve                 10000 non-null  float64
+ 5   std_deviation_dm_snr_curve        9028 non-null   float64
+ 6   kurtosis_dm_snr_curve             10000 non-null  float64
+ 7   skewness_dm_snr_curve             9500 non-null   float64
+ 8   target_class                      10000 non-null  int64  
+dtypes: float64(8), int64(1)
+memory usage: 703.2 KB
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p><strong>Insights</strong></p>
+<ul>
+<li>Out of the eight descriptive features, two columns, Excess kurtosis of the integrated profile, Skewness of the DM-SNR curve and Standard deviation of the DM-SNR curve, have missing values with non-null counts of 8,607, 95,00 and 9,028, respectively. </li>
+<li>All features are represented as floating-point numbers (float64), except for the target_class, which is an integer type (int64).</li>
+</ul>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[6]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># data target class view</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">target_class</span><span class="o">.</span><span class="n">value_counts</span><span class="p">())</span>
+<span class="n">data</span><span class="o">.</span><span class="n">target_class</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">kind</span><span class="o">=</span><span class="s1">&#39;bar&#39;</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output">
+<pre>0    9081
+1     919
+Name: target_class, dtype: int64
+</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[6]:</div>
+
+
+
+
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult">
+<pre>&lt;AxesSubplot:&gt;</pre>
+</div>
+
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p><strong>Insights</strong></p>
+<p>The bar chart represents the distribution of two classes in the target variable, labeled as &#39;0&#39; and &#39;1&#39;. It shows an imbalanced class distribution, with class &#39;0&#39; being considerably more prevalent (almost 90%) than class &#39;1&#39; (almost 10%).</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[7]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># checking for outliers</span>
+<span class="k">def</span> <span class="nf">count_outliers</span><span class="p">(</span><span class="n">column</span><span class="p">):</span>
+    <span class="n">Q1</span> <span class="o">=</span> <span class="n">column</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="mf">0.25</span><span class="p">)</span>
+    <span class="n">Q3</span> <span class="o">=</span> <span class="n">column</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="mf">0.75</span><span class="p">)</span>
+    <span class="n">IQR</span> <span class="o">=</span> <span class="n">Q3</span> <span class="o">-</span> <span class="n">Q1</span>
+    <span class="n">lower_bound</span> <span class="o">=</span> <span class="n">Q1</span> <span class="o">-</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">IQR</span>
+    <span class="n">upper_bound</span> <span class="o">=</span> <span class="n">Q3</span> <span class="o">+</span> <span class="mf">1.5</span> <span class="o">*</span> <span class="n">IQR</span>
+    <span class="n">outliers</span> <span class="o">=</span> <span class="n">column</span><span class="p">[(</span><span class="n">column</span> <span class="o">&lt;</span> <span class="n">lower_bound</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">column</span> <span class="o">&gt;</span> <span class="n">upper_bound</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">outliers</span><span class="p">)</span>
+
+<span class="c1"># Count and print the number of outliers in each column</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;float64&#39;</span><span class="p">,</span> <span class="s1">&#39;int64&#39;</span><span class="p">]:</span>  <span class="c1"># Only consider numeric columns</span>
+        <span class="n">num_outliers</span> <span class="o">=</span> <span class="n">count_outliers</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">col</span><span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">num_outliers</span><span class="si">}</span><span class="s1"> outliers&#39;</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output">
+<pre>mean_integrated_profile: 570 outliers
+std_deviation_integrated_profile: 156 outliers
+kurtosis_integrated_profile: 782 outliers
+skewness_integrated_profile: 1069 outliers
+mean_dm_snr_curve: 1643 outliers
+std_deviation_dm_snr_curve: 1198 outliers
+kurtosis_dm_snr_curve: 288 outliers
+skewness_dm_snr_curve: 497 outliers
+target_class: 919 outliers
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[8]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Plot box plots for each column both classes</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">select_dtypes</span><span class="p">(</span><span class="n">include</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;float64&#39;</span><span class="p">]),</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Box plots of all numerical columns&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[9]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Splitting the DataFrame based on the target class</span>
+<span class="n">data_class_0</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;target_class&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
+<span class="n">data_class_1</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;target_class&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">]</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[10]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Plotting box plots for each target class</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data_class_0</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;target_class&#39;</span><span class="p">]),</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Box plots of all numerical columns (Target Class 0)&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">boxplot</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data_class_1</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;target_class&#39;</span><span class="p">]),</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Box plots of all numerical columns (Target Class 1)&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>  <span class="c1"># Adjusts the space between the plots</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p>The skewness and kurtosis (which deal with the shape of the data distribution) of both integrated profile and DM-SNR curve seem especially varied between the two classes.</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[11]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Quantify missing values</span>
+<span class="n">missing_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="n">missing_percentage</span> <span class="o">=</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">))</span> <span class="o">*</span> <span class="mi">100</span>
+
+<span class="c1"># Calculate mean, median and std. deviation for each column</span>
+<span class="n">column_mean</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="n">column_median</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
+<span class="n">column_std</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+
+<span class="n">missing_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s1">&#39;Total Missing&#39;</span><span class="p">:</span> <span class="n">missing_data</span><span class="p">,</span>
+    <span class="s1">&#39;Percentage&#39;</span><span class="p">:</span> <span class="n">missing_percentage</span><span class="p">,</span>
+    <span class="s1">&#39;Mean&#39;</span><span class="p">:</span> <span class="n">column_mean</span><span class="p">,</span>
+    <span class="s1">&#39;Median&#39;</span><span class="p">:</span> <span class="n">column_median</span><span class="p">,</span>
+    <span class="s1">&#39;Std. Deviation&#39;</span><span class="p">:</span> <span class="n">column_std</span>
+<span class="p">})</span>
+
+<span class="n">missing_df</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[11]:</div>
+
+
+
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult">
+<div>
+
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Total Missing</th>
+      <th>Percentage</th>
+      <th>Mean</th>
+      <th>Median</th>
+      <th>Std. Deviation</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>mean_integrated_profile</th>
+      <td>0</td>
+      <td>0.00</td>
+      <td>111.063741</td>
+      <td>115.101562</td>
+      <td>25.693491</td>
+    </tr>
+    <tr>
+      <th>std_deviation_integrated_profile</th>
+      <td>0</td>
+      <td>0.00</td>
+      <td>46.524734</td>
+      <td>46.928178</td>
+      <td>6.833823</td>
+    </tr>
+    <tr>
+      <th>kurtosis_integrated_profile</th>
+      <td>1393</td>
+      <td>13.93</td>
+      <td>0.484061</td>
+      <td>0.226454</td>
+      <td>1.071684</td>
+    </tr>
+    <tr>
+      <th>skewness_integrated_profile</th>
+      <td>0</td>
+      <td>0.00</td>
+      <td>1.775286</td>
+      <td>0.201928</td>
+      <td>6.197844</td>
+    </tr>
+    <tr>
+      <th>mean_dm_snr_curve</th>
+      <td>0</td>
+      <td>0.00</td>
+      <td>12.640597</td>
+      <td>2.818562</td>
+      <td>29.576861</td>
+    </tr>
+    <tr>
+      <th>std_deviation_dm_snr_curve</th>
+      <td>972</td>
+      <td>9.72</td>
+      <td>26.390780</td>
+      <td>18.467852</td>
+      <td>19.611599</td>
+    </tr>
+    <tr>
+      <th>kurtosis_dm_snr_curve</th>
+      <td>0</td>
+      <td>0.00</td>
+      <td>8.310517</td>
+      <td>8.407720</td>
+      <td>4.525558</td>
+    </tr>
+    <tr>
+      <th>skewness_dm_snr_curve</th>
+      <td>500</td>
+      <td>5.00</td>
+      <td>104.973400</td>
+      <td>82.167904</td>
+      <td>106.650347</td>
+    </tr>
+    <tr>
+      <th>target_class</th>
+      <td>0</td>
+      <td>0.00</td>
+      <td>0.091900</td>
+      <td>0.000000</td>
+      <td>0.288899</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p>Given the distribution of data points in columns with missing values, it seems ideal to use the median to fill in the missing values because the median value is robust to outliers, the data has a broad spread around the mean and has a large standard deviation.</p>
+<p>There&#39;s a significant difference between the mean and median, and a large standard deviation in this dataset which is why the median is used.</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[12]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Impute missing values based on the suggestions</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;kurtosis_integrated_profile&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;kurtosis_integrated_profile&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">(),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;std_deviation_dm_snr_curve&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;std_deviation_dm_snr_curve&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">(),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">data</span><span class="p">[</span><span class="s1">&#39;skewness_dm_snr_curve&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;skewness_dm_snr_curve&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">(),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[13]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># visualise the distribution of the data</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">style</span><span class="o">=</span><span class="s2">&quot;ticks&quot;</span><span class="p">)</span>
+<span class="n">pair_plot</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">pairplot</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="s2">&quot;target_class&quot;</span><span class="p">,</span> <span class="n">palette</span><span class="o">=</span><span class="s2">&quot;husl&quot;</span><span class="p">)</span>
+<span class="c1"># Show the plot</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<h3><strong>Task 2:</strong> Normalize or standardize your features as necessary. Carefully decide the  normalization or standardization technique used. [5 marks]<a rel="noopener" class="anchor-link" href="#Task-2:-Normalize-or-standardize-your-features-as-necessary.-Carefully-decide-the--normalization-or-standardization-technique-used.-[5-marks]">&#182;</a></h3>
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p><strong>Why Standardize and Not Normalize?</strong></p>
+<ul>
+<li>The features have a wide range of values and different units, standardizing will transform the data giving it a mean of 0 and a standard deviation of 1, which is generally good practice for many machine learning algorithms. So, standardizing will help in bringing all of the values to a common scale.</li>
+<li>Features like kurtosis and skewness are sensitive to outliers. Standardizing helps in minimizing the impact of outliers.</li>
+<li>Standard deviation is a scale-dependent measure, so standardizing it is a good option.</li>
+</ul>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[14]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+
+<span class="n">scaler</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
+<span class="n">features_to_standardize</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;mean_integrated_profile&#39;</span><span class="p">,</span> <span class="s1">&#39;std_deviation_integrated_profile&#39;</span><span class="p">,</span> 
+                            <span class="s1">&#39;kurtosis_integrated_profile&#39;</span><span class="p">,</span> <span class="s1">&#39;skewness_integrated_profile&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;mean_dm_snr_curve&#39;</span><span class="p">,</span> <span class="s1">&#39;std_deviation_dm_snr_curve&#39;</span><span class="p">,</span> 
+                            <span class="s1">&#39;kurtosis_dm_snr_curve&#39;</span><span class="p">,</span> <span class="s1">&#39;skewness_dm_snr_curve&#39;</span><span class="p">]</span>
+
+<span class="n">data</span><span class="p">[</span><span class="n">features_to_standardize</span><span class="p">]</span> <span class="o">=</span> <span class="n">scaler</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">features_to_standardize</span><span class="p">])</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<h3><strong>Task 3:</strong> Carefully decide the evaluation measure that is best suited to this application and  the dataset. Justify your choice -- What characteristics of the application and the dataset  made you decide the evaluation measure you chose. [5 marks]<a rel="noopener" class="anchor-link" href="#Task-3:-Carefully-decide-the-evaluation-measure-that-is-best-suited-to-this-application-and--the-dataset.-Justify-your-choice----What-characteristics-of-the-application-and-the-dataset--made-you-decide-the-evaluation-measure-you-chose.-[5-marks]">&#182;</a></h3>
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p><strong>Suitable Evaluation Metrics</strong></p>
+<ul>
+<li>Precision: Precision is the number of true positives divided by the sum of true positives and false positives. Since false positives (predicting a non-pulsar star as a pulsar) can be quite costly in this context, precision might be a good metric to consider.</li>
+<li>Recall: Recall is the number of true positives divided by the sum of true positives and false negatives. In the context of pulsar star classification, missing a true pulsar (false negative) can be more costly than falsely identifying one, making recall a critical metric.</li>
+<li>F1 Score: The F1 score is the harmonic mean of precision and recall, and it helps to balance the trade-off between these two metrics. Given the cost of both false positives and false negatives, the F1 score could be a suitable evaluation metric.</li>
+<li>Area Under the Receiver Operating Characteristic (ROC) Curve (AUC-ROC): Since the data is imbalanced, AUC-ROC could be a good choice as it is insensitive to the imbalance. It evaluates the model’s ability to discriminate between the positive and negative classes.</li>
+<li>Area Under the Precision-Recall Curve (AUC-PR): In imbalanced datasets, the Precision-Recall curve might be more informative than the ROC curve, and the area under the PR curve (AUC-PR) can be a good evaluation metric.</li>
+</ul>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[15]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># define a suitable function according to evaluation measures</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="p">(</span><span class="n">classification_report</span><span class="p">,</span> <span class="n">accuracy_score</span><span class="p">,</span> <span class="n">precision_score</span><span class="p">,</span> <span class="n">recall_score</span><span class="p">,</span> <span class="n">f1_score</span><span class="p">,</span> 
+                             <span class="n">average_precision_score</span><span class="p">,</span> <span class="n">confusion_matrix</span><span class="p">,</span> <span class="n">roc_curve</span><span class="p">,</span> <span class="n">roc_auc_score</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">evaluate_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.5</span><span class="p">):</span>
+    <span class="c1"># Make predictions</span>
+    <span class="n">y_pred_prob</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">y_pred_prob</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    
+    <span class="c1"># Calculate metrics</span>
+    <span class="n">precision</span> <span class="o">=</span> <span class="n">precision_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+    <span class="n">recall</span> <span class="o">=</span> <span class="n">recall_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+    <span class="n">f1</span> <span class="o">=</span> <span class="n">f1_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+    <span class="n">auc_pr</span> <span class="o">=</span> <span class="n">average_precision_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_prob</span><span class="p">)</span>
+    <span class="n">roc_auc</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_prob</span><span class="p">)</span>
+    
+    <span class="c1"># Print the evaluation report</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Precision: </span><span class="si">{:.4f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">precision</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Recall: </span><span class="si">{:.4f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">recall</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;F1 Score: </span><span class="si">{:.4f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">f1</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;AUC-PR: </span><span class="si">{:.4f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">auc_pr</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;AUC-ROC: </span><span class="si">{:.4f}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">roc_auc</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Classification Report:</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">classification_report</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))</span>
+    
+    <span class="c1"># Plot confusion matrix</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="n">cm</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+    <span class="n">sns</span><span class="o">.</span><span class="n">heatmap</span><span class="p">(</span><span class="n">cm</span><span class="p">,</span> <span class="n">annot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">fmt</span><span class="o">=</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;Blues&#39;</span><span class="p">,</span> <span class="n">xticklabels</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Non-Pulsar&#39;</span><span class="p">,</span> <span class="s1">&#39;Pulsar&#39;</span><span class="p">],</span> <span class="n">yticklabels</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Non-Pulsar&#39;</span><span class="p">,</span> <span class="s1">&#39;Pulsar&#39;</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Actual&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Predicted&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Confusion Matrix&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+    <span class="c1"># Plot ROC curve</span>
+    <span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">roc_curve</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_prob</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">fpr</span><span class="p">,</span> <span class="n">tpr</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;ROC curve (area = </span><span class="si">{:.4f}</span><span class="s1">)&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">roc_auc</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;grey&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">([</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.05</span><span class="p">])</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;False Positive Rate&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;True Positive Rate&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Receiver Operating Characteristic (ROC)&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower right&quot;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<h3><strong>Task 4:</strong> Compare a decision tree classifier, a kNN classifier and four SVM classifiers (one  each with “linear”, “poly”, “rbf” and “sigmoid” kernel) based on the evaluation measure selected in  Task 3. Carefully decide the evaluation methodology for this comparison (e.g., cross  validation or a single train/validation/test split or other alternatives). Explore the effect of different  parameter settings on these classifiers and find the winner classifier/ parameter setting. Why do you think  you got those comparison results? Are you surprised at the relative performance of “linear”,  “rbf” and “sigmoid” kernels? [25 marks]<a rel="noopener" class="anchor-link" href="#Task-4:-Compare-a-decision-tree-classifier,-a-kNN-classifier-and-four-SVM-classifiers-(one--each-with-“linear”,-“poly”,-“rbf”-and-“sigmoid”-kernel)-based-on-the-evaluation-measure-selected-in--Task-3.-Carefully-decide-the-evaluation-methodology-for-this-comparison-(e.g.,-cross--validation-or-a-single-train/validation/test-split-or-other-alternatives).-Explore-the-effect-of-different--parameter-settings-on-these-classifiers-and-find-the-winner-classifier/-parameter-setting.-Why-do-you-think--you-got-those-comparison-results?-Are-you-surprised-at-the-relative-performance-of-“linear”,--“rbf”-and-“sigmoid”-kernels?-[25-marks]">&#182;</a></h3>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[16]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span><span class="p">,</span> <span class="n">GridSearchCV</span>
+<span class="kn">from</span> <span class="nn">sklearn.tree</span> <span class="kn">import</span> <span class="n">DecisionTreeClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.neighbors</span> <span class="kn">import</span> <span class="n">KNeighborsClassifier</span>
+<span class="kn">from</span> <span class="nn">sklearn.svm</span> <span class="kn">import</span> <span class="n">SVC</span>
+<span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
+<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">make_pipeline</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[17]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># prepare data fro models</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;target_class&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;target_class&#39;</span><span class="p">]</span>
+
+<span class="c1"># Split the data</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p>Modelling using default parameters</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[18]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">DecisionTreeClassifier</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+<span class="n">KNeighborsClassifier</span><span class="p">()</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[18]:</div>
+
+
+
+
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult">
+<pre>KNeighborsClassifier()</pre>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[19]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Define Models</span>
+<span class="n">models</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;DecisionTree&#39;</span><span class="p">:</span> <span class="n">DecisionTreeClassifier</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">),</span>
+    <span class="s1">&#39;kNN&#39;</span><span class="p">:</span> <span class="n">KNeighborsClassifier</span><span class="p">(),</span>
+    <span class="s1">&#39;SVM_linear&#39;</span><span class="p">:</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">probability</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">),</span>
+    <span class="s1">&#39;SVM_poly&#39;</span><span class="p">:</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s1">&#39;poly&#39;</span><span class="p">,</span> <span class="n">probability</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">),</span>
+    <span class="s1">&#39;SVM_rbf&#39;</span><span class="p">:</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s1">&#39;rbf&#39;</span><span class="p">,</span> <span class="n">probability</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">),</span>
+    <span class="s1">&#39;SVM_sigmoid&#39;</span><span class="p">:</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s1">&#39;sigmoid&#39;</span><span class="p">,</span> <span class="n">probability</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">),</span>
+<span class="p">}</span>
+
+<span class="c1"># Train Models, Store Results, and Save Trained Models</span>
+<span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">trained_models</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+    <span class="n">y_pred_prob</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+    
+    <span class="n">precision</span> <span class="o">=</span> <span class="n">precision_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+    <span class="n">recall</span> <span class="o">=</span> <span class="n">recall_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+    <span class="n">accuracy</span> <span class="o">=</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+    <span class="n">f1</span> <span class="o">=</span> <span class="n">f1_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+    <span class="n">auc_roc</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_prob</span><span class="p">)</span>
+    
+    <span class="n">results</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;Precision&#39;</span><span class="p">:</span> <span class="n">precision</span><span class="p">,</span>
+        <span class="s1">&#39;Recall&#39;</span><span class="p">:</span> <span class="n">recall</span><span class="p">,</span>
+        <span class="s1">&#39;Accuracy&#39;</span><span class="p">:</span> <span class="n">accuracy</span><span class="p">,</span>
+        <span class="s1">&#39;F1 Score&#39;</span><span class="p">:</span> <span class="n">f1</span><span class="p">,</span>
+        <span class="s1">&#39;AUC-ROC&#39;</span><span class="p">:</span> <span class="n">auc_roc</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">trained_models</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[20]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># convert Results to DataFrame</span>
+<span class="n">results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">results</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+<span class="n">results_df</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[20]:</div>
+
+
+
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult">
+<div>
+
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Precision</th>
+      <th>Recall</th>
+      <th>Accuracy</th>
+      <th>F1 Score</th>
+      <th>AUC-ROC</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>DecisionTree</th>
+      <td>0.783654</td>
+      <td>0.848958</td>
+      <td>0.9630</td>
+      <td>0.815000</td>
+      <td>0.912034</td>
+    </tr>
+    <tr>
+      <th>kNN</th>
+      <td>0.949438</td>
+      <td>0.880208</td>
+      <td>0.9840</td>
+      <td>0.913514</td>
+      <td>0.956213</td>
+    </tr>
+    <tr>
+      <th>SVM_linear</th>
+      <td>0.964286</td>
+      <td>0.843750</td>
+      <td>0.9820</td>
+      <td>0.900000</td>
+      <td>0.967886</td>
+    </tr>
+    <tr>
+      <th>SVM_poly</th>
+      <td>0.969512</td>
+      <td>0.828125</td>
+      <td>0.9810</td>
+      <td>0.893258</td>
+      <td>0.958901</td>
+    </tr>
+    <tr>
+      <th>SVM_rbf</th>
+      <td>0.971098</td>
+      <td>0.875000</td>
+      <td>0.9855</td>
+      <td>0.920548</td>
+      <td>0.963510</td>
+    </tr>
+    <tr>
+      <th>SVM_sigmoid</th>
+      <td>0.295775</td>
+      <td>0.328125</td>
+      <td>0.8605</td>
+      <td>0.311111</td>
+      <td>0.859693</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[21]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># plotting results</span>
+<span class="n">results_df_reset</span> <span class="o">=</span> <span class="n">results_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="s1">&#39;Model&#39;</span><span class="p">})</span>
+<span class="n">results_long</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">results_df_reset</span><span class="p">,</span> <span class="n">id_vars</span><span class="o">=</span><span class="s1">&#39;Model&#39;</span><span class="p">,</span> <span class="n">var_name</span><span class="o">=</span><span class="s1">&#39;Metric&#39;</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s1">&#39;Value&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">barplot</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">barplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;Model&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;Value&#39;</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="s1">&#39;Metric&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">results_long</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Model&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Score&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Performance Comparison of All Base Models with default Parameters&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
+<span class="n">barplot</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper left&#39;</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Metric&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p>These results give us an overall performance idea of the model, which seems pretty fine for all models except for the SVM_signmoid becuase the dataset is highly imbalanced dataset. So, I will evaluate each of base models using the evaluation strategy previously defined on a per class basis, this will further my understanding of the results.</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<h4>Detailed Evaluation of base models<a rel="noopener" class="anchor-link" href="#Detailed-Evaluation-of-base-models">&#182;</a></h4>
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p>Decision Tree Model Evaluation</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[22]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Load the trained Decision Tree model</span>
+<span class="n">decision_tree_model</span> <span class="o">=</span> <span class="n">trained_models</span><span class="p">[</span><span class="s1">&#39;DecisionTree&#39;</span><span class="p">]</span>
+<span class="c1"># Evaluate the Decision Tree model</span>
+<span class="n">evaluate_model</span><span class="p">(</span><span class="n">decision_tree_model</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output">
+<pre>Precision: 0.7837
+Recall: 0.8490
+F1 Score: 0.8150
+AUC-PR: 0.6798
+AUC-ROC: 0.9120
+
+Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.98      0.98      0.98      1808
+           1       0.78      0.85      0.82       192
+
+    accuracy                           0.96      2000
+   macro avg       0.88      0.91      0.90      2000
+weighted avg       0.96      0.96      0.96      2000
+
+</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p>kNN Model Evaluation</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[23]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">knn_model</span> <span class="o">=</span> <span class="n">trained_models</span><span class="p">[</span><span class="s1">&#39;kNN&#39;</span><span class="p">]</span>
+<span class="n">evaluate_model</span><span class="p">(</span><span class="n">knn_model</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output">
+<pre>Precision: 0.9494
+Recall: 0.8802
+F1 Score: 0.9135
+AUC-PR: 0.8946
+AUC-ROC: 0.9562
+
+Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.99      1.00      0.99      1808
+           1       0.95      0.88      0.91       192
+
+    accuracy                           0.98      2000
+   macro avg       0.97      0.94      0.95      2000
+weighted avg       0.98      0.98      0.98      2000
+
+</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p>SVM Linear Model Evaluation</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[24]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">svm_linear_model</span> <span class="o">=</span> <span class="n">trained_models</span><span class="p">[</span><span class="s1">&#39;SVM_linear&#39;</span><span class="p">]</span>
+<span class="n">evaluate_model</span><span class="p">(</span><span class="n">svm_linear_model</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output">
+<pre>Precision: 0.9643
+Recall: 0.8438
+F1 Score: 0.9000
+AUC-PR: 0.9287
+AUC-ROC: 0.9679
+
+Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.98      1.00      0.99      1808
+           1       0.96      0.84      0.90       192
+
+    accuracy                           0.98      2000
+   macro avg       0.97      0.92      0.95      2000
+weighted avg       0.98      0.98      0.98      2000
+
+</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p>SVM Poly Model Evaluation</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[25]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">svm_poly_model</span> <span class="o">=</span> <span class="n">trained_models</span><span class="p">[</span><span class="s1">&#39;SVM_poly&#39;</span><span class="p">]</span>
+<span class="n">evaluate_model</span><span class="p">(</span><span class="n">svm_poly_model</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output">
+<pre>Precision: 0.9742
+Recall: 0.7865
+F1 Score: 0.8703
+AUC-PR: 0.9268
+AUC-ROC: 0.9589
+
+Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.98      1.00      0.99      1808
+           1       0.97      0.79      0.87       192
+
+    accuracy                           0.98      2000
+   macro avg       0.98      0.89      0.93      2000
+weighted avg       0.98      0.98      0.98      2000
+
+</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p>SVM rbf Model Evaluation</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[26]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">svm_rbf_model</span> <span class="o">=</span> <span class="n">trained_models</span><span class="p">[</span><span class="s1">&#39;SVM_rbf&#39;</span><span class="p">]</span>
+<span class="n">evaluate_model</span><span class="p">(</span><span class="n">svm_rbf_model</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output">
+<pre>Precision: 0.9711
+Recall: 0.8750
+F1 Score: 0.9205
+AUC-PR: 0.9186
+AUC-ROC: 0.9635
+
+Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.99      1.00      0.99      1808
+           1       0.97      0.88      0.92       192
+
+    accuracy                           0.99      2000
+   macro avg       0.98      0.94      0.96      2000
+weighted avg       0.99      0.99      0.99      2000
+
+</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p>SVM sigmoid Model Evaluation</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[27]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">svm_sigmoid_model</span> <span class="o">=</span> <span class="n">trained_models</span><span class="p">[</span><span class="s1">&#39;SVM_sigmoid&#39;</span><span class="p">]</span>
+<span class="n">evaluate_model</span><span class="p">(</span><span class="n">svm_sigmoid_model</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output">
+<pre>Precision: 0.3469
+Recall: 0.0885
+F1 Score: 0.1411
+AUC-PR: 0.3171
+AUC-ROC: 0.8597
+
+Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.91      0.98      0.94      1808
+           1       0.35      0.09      0.14       192
+
+    accuracy                           0.90      2000
+   macro avg       0.63      0.54      0.54      2000
+weighted avg       0.86      0.90      0.87      2000
+
+</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p><strong>Insights:</strong></p>
+<p>SVM with RBF kernel and kNN models show the best overall performance across all metrics. The SVM with a sigmoid kernel performs poorly, especially in identifying the minority class.</p>
+<ul>
+<li>The DT model has a good performance on the majority class (0), with a precision of 0.98 and a recall of 0.98. However, it shows weaker results on the minority class (1) with a precision of 0.78 and a recall of 0.85.</li>
+<li><p>The kNN model excels in identifying the majority class with a precision of 0.99 and a recall of 1.00. It also performs well on the minority class with a precision of 0.95 and a recall of 0.88, outperforming the DT model.With an F1 score of 0.91 for the minority class and an overall accuracy of 0.98, kNN shows a strong and balanced performance.</p>
+</li>
+<li><p>The SVM with a linear kernel shows excellent performance on the majority class and good performance on the minority class.</p>
+</li>
+<li>The SVM with RBF kernel shows excellent results, particularly on the majority class. It has a slightly better balance between precision and recall for the minority class compared to the linear kernel, with a recall of 0.88.</li>
+<li>The SVM with a sigmoid kernel presents a stark contrast to the other models, showing a significant drop in performance.</li>
+<li>The SVM with a polynomial kernel performs very well on the majority class but has a lower recall for the minority class (0.79).</li>
+</ul>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<h4><strong>Hyperparameter Tuning the Models for best Parameters</strong><a rel="noopener" class="anchor-link" href="#Hyperparameter-Tuning-the-Models-for-best-Parameters">&#182;</a></h4>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[28]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;DecisionTree&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;classifier__max_depth&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+        <span class="s1">&#39;classifier__min_samples_split&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">],</span>
+        <span class="s1">&#39;classifier__min_samples_leaf&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">],</span>
+        <span class="s1">&#39;classifier__max_features&#39;</span><span class="p">:</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;sqrt&#39;</span><span class="p">,</span> <span class="s1">&#39;log2&#39;</span><span class="p">]</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;kNN&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;classifier__n_neighbors&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">11</span><span class="p">],</span>
+        <span class="s1">&#39;classifier__weights&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;uniform&#39;</span><span class="p">,</span> <span class="s1">&#39;distance&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;classifier__algorithm&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="s1">&#39;ball_tree&#39;</span><span class="p">,</span> <span class="s1">&#39;kd_tree&#39;</span><span class="p">,</span> <span class="s1">&#39;brute&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;classifier__p&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;SVM_linear&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;classifier__C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span>
+        <span class="s1">&#39;classifier__tol&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1e-4</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="mf">1e-2</span><span class="p">]</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;SVM_poly&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;classifier__C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span>
+        <span class="s1">&#39;classifier__degree&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+        <span class="s1">&#39;classifier__coef0&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="s1">&#39;classifier__tol&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1e-4</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="mf">1e-2</span><span class="p">]</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;SVM_rbf&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;classifier__C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span>
+        <span class="s1">&#39;classifier__gamma&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;scale&#39;</span><span class="p">,</span> <span class="s1">&#39;auto&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;classifier__tol&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1e-4</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="mf">1e-2</span><span class="p">]</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;SVM_sigmoid&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;classifier__C&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">],</span>
+        <span class="s1">&#39;classifier__gamma&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;scale&#39;</span><span class="p">,</span> <span class="s1">&#39;auto&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;classifier__coef0&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span>
+        <span class="s1">&#39;classifier__tol&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1e-4</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="mf">1e-2</span><span class="p">]</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[29]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">GridSearchCV</span>
+<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span>
+
+<span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">trained_models</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># store the trained models</span>
+
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="c1"># Create a pipeline</span>
+    <span class="n">pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([(</span><span class="s1">&#39;classifier&#39;</span><span class="p">,</span> <span class="n">model</span><span class="p">)])</span>
+    
+    <span class="c1"># Get the parameters for the current model</span>
+    <span class="n">param_grid</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+    
+    <span class="c1"># Perform GridSearchCV</span>
+    <span class="n">grid_search</span> <span class="o">=</span> <span class="n">GridSearchCV</span><span class="p">(</span><span class="n">pipeline</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">,</span> <span class="n">cv</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">scoring</span><span class="o">=</span><span class="s1">&#39;recall_weighted&#39;</span><span class="p">)</span>  
+    <span class="n">grid_search</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    
+    <span class="c1"># Get the best model</span>
+    <span class="n">best_model</span> <span class="o">=</span> <span class="n">grid_search</span><span class="o">.</span><span class="n">best_estimator_</span>
+    
+    <span class="c1"># Store the best trained model</span>
+    <span class="n">trained_models</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">best_model</span>
+    
+    <span class="c1"># Make predictions</span>
+    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">best_model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+    <span class="n">y_pred_prob</span> <span class="o">=</span> <span class="n">best_model</span><span class="o">.</span><span class="n">predict_proba</span><span class="p">(</span><span class="n">X_test</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+    
+    <span class="c1"># Calculate performance metrics</span>
+    <span class="n">precision</span> <span class="o">=</span> <span class="n">precision_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+    <span class="n">recall</span> <span class="o">=</span> <span class="n">recall_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+    <span class="n">accuracy</span> <span class="o">=</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+    <span class="n">f1</span> <span class="o">=</span> <span class="n">f1_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">)</span>
+    <span class="n">auc_roc</span> <span class="o">=</span> <span class="n">roc_auc_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred_prob</span><span class="p">)</span>
+    
+    <span class="c1"># Store results including the parameters of the best model</span>
+    <span class="n">results</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">&#39;Best Params&#39;</span><span class="p">:</span> <span class="n">grid_search</span><span class="o">.</span><span class="n">best_params_</span><span class="p">,</span>
+        <span class="s1">&#39;Precision&#39;</span><span class="p">:</span> <span class="n">precision</span><span class="p">,</span>
+        <span class="s1">&#39;Recall&#39;</span><span class="p">:</span> <span class="n">recall</span><span class="p">,</span>
+        <span class="s1">&#39;Accuracy&#39;</span><span class="p">:</span> <span class="n">accuracy</span><span class="p">,</span>
+        <span class="s1">&#39;F1 Score&#39;</span><span class="p">:</span> <span class="n">f1</span><span class="p">,</span>
+        <span class="s1">&#39;AUC-ROC&#39;</span><span class="p">:</span> <span class="n">auc_roc</span><span class="p">,</span>
+    <span class="p">}</span>
+
+<span class="c1"># Create a DataFrame from the results dictionary</span>
+<span class="n">results_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">)</span>
+<span class="n">results_df</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[29]:</div>
+
+
+
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult">
+<div>
+
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>Best Params</th>
+      <th>Precision</th>
+      <th>Recall</th>
+      <th>Accuracy</th>
+      <th>F1 Score</th>
+      <th>AUC-ROC</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>DecisionTree</th>
+      <td>{&#39;classifier__max_depth&#39;: 5, &#39;classifier__max_...</td>
+      <td>0.938889</td>
+      <td>0.880208</td>
+      <td>0.9830</td>
+      <td>0.908602</td>
+      <td>0.948617</td>
+    </tr>
+    <tr>
+      <th>kNN</th>
+      <td>{&#39;classifier__algorithm&#39;: &#39;auto&#39;, &#39;classifier_...</td>
+      <td>0.933333</td>
+      <td>0.875000</td>
+      <td>0.9820</td>
+      <td>0.903226</td>
+      <td>0.953618</td>
+    </tr>
+    <tr>
+      <th>SVM_linear</th>
+      <td>{&#39;classifier__C&#39;: 10, &#39;classifier__tol&#39;: 0.0001}</td>
+      <td>0.964286</td>
+      <td>0.843750</td>
+      <td>0.9820</td>
+      <td>0.900000</td>
+      <td>0.967278</td>
+    </tr>
+    <tr>
+      <th>SVM_poly</th>
+      <td>{&#39;classifier__C&#39;: 10, &#39;classifier__coef0&#39;: 2, ...</td>
+      <td>0.965318</td>
+      <td>0.869792</td>
+      <td>0.9845</td>
+      <td>0.915068</td>
+      <td>0.973636</td>
+    </tr>
+    <tr>
+      <th>SVM_rbf</th>
+      <td>{&#39;classifier__C&#39;: 100, &#39;classifier__gamma&#39;: 0....</td>
+      <td>0.921348</td>
+      <td>0.854167</td>
+      <td>0.9790</td>
+      <td>0.886486</td>
+      <td>0.958417</td>
+    </tr>
+    <tr>
+      <th>SVM_sigmoid</th>
+      <td>{&#39;classifier__C&#39;: 1, &#39;classifier__coef0&#39;: 0, &#39;...</td>
+      <td>0.963415</td>
+      <td>0.822917</td>
+      <td>0.9800</td>
+      <td>0.887640</td>
+      <td>0.967716</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[30]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">results_df_reset</span> <span class="o">=</span> <span class="n">results_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;index&#39;</span><span class="p">:</span> <span class="s1">&#39;Model&#39;</span><span class="p">})</span>
+<span class="n">results_long</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">results_df_reset</span><span class="p">,</span> <span class="n">id_vars</span><span class="o">=</span><span class="s1">&#39;Model&#39;</span><span class="p">,</span> <span class="n">var_name</span><span class="o">=</span><span class="s1">&#39;Metric&#39;</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s1">&#39;Value&#39;</span><span class="p">)</span>
+<span class="n">results_long</span> <span class="o">=</span> <span class="n">results_long</span><span class="p">[</span><span class="n">results_long</span><span class="p">[</span><span class="s1">&#39;Metric&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;Best Params&#39;</span><span class="p">]</span>
+
+<span class="c1"># Plotting</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">barplot</span> <span class="o">=</span> <span class="n">sns</span><span class="o">.</span><span class="n">barplot</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="s1">&#39;Model&#39;</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;Value&#39;</span><span class="p">,</span> <span class="n">hue</span><span class="o">=</span><span class="s1">&#39;Metric&#39;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">results_long</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Model&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Score&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s1">&#39;Performance Comparison of All Models with Optimized Parameters&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="mi">45</span><span class="p">)</span>
+<span class="n">barplot</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper left&#39;</span><span class="p">,</span> <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Metric&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p><strong>Insights</strong></p>
+<ul>
+<li>Visually It can be seen that hyperparameter optimisation has improved the overall performance of the models, notably the SVM_sigmoid.</li>
+<li>I have further explored the models below.</li>
+</ul>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[31]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">trained_models</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[31]:</div>
+
+
+
+
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult">
+<pre>{&#39;DecisionTree&#39;: Pipeline(steps=[(&#39;classifier&#39;,
+                  DecisionTreeClassifier(max_depth=5, random_state=42))]),
+ &#39;kNN&#39;: Pipeline(steps=[(&#39;classifier&#39;, KNeighborsClassifier(p=1, weights=&#39;distance&#39;))]),
+ &#39;SVM_linear&#39;: Pipeline(steps=[(&#39;classifier&#39;,
+                  SVC(C=10, kernel=&#39;linear&#39;, probability=True, random_state=42,
+                      tol=0.0001))]),
+ &#39;SVM_poly&#39;: Pipeline(steps=[(&#39;classifier&#39;,
+                  SVC(C=10, coef0=2, degree=2, kernel=&#39;poly&#39;, probability=True,
+                      random_state=42, tol=0.0001))]),
+ &#39;SVM_rbf&#39;: Pipeline(steps=[(&#39;classifier&#39;,
+                  SVC(C=100, gamma=0.1, probability=True, random_state=42,
+                      tol=0.0001))]),
+ &#39;SVM_sigmoid&#39;: Pipeline(steps=[(&#39;classifier&#39;,
+                  SVC(C=1, coef0=0, gamma=0.01, kernel=&#39;sigmoid&#39;,
+                      probability=True, random_state=42, tol=0.0001))])}</pre>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p>Decision Tree Model Evaluation</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[32]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Load the trained Decision Tree model</span>
+<span class="n">decision_tree_model</span> <span class="o">=</span> <span class="n">trained_models</span><span class="p">[</span><span class="s1">&#39;DecisionTree&#39;</span><span class="p">]</span>
+<span class="c1"># Evaluate the Decision Tree model</span>
+<span class="n">evaluate_model</span><span class="p">(</span><span class="n">decision_tree_model</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output">
+<pre>Precision: 0.9389
+Recall: 0.8802
+F1 Score: 0.9086
+AUC-PR: 0.9005
+AUC-ROC: 0.9486
+
+Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.99      0.99      0.99      1808
+           1       0.94      0.88      0.91       192
+
+    accuracy                           0.98      2000
+   macro avg       0.96      0.94      0.95      2000
+weighted avg       0.98      0.98      0.98      2000
+
+</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p>kNN Model Evaluation</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[33]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">knn_model</span> <span class="o">=</span> <span class="n">trained_models</span><span class="p">[</span><span class="s1">&#39;kNN&#39;</span><span class="p">]</span>
+<span class="n">evaluate_model</span><span class="p">(</span><span class="n">knn_model</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output">
+<pre>Precision: 0.9333
+Recall: 0.8750
+F1 Score: 0.9032
+AUC-PR: 0.9011
+AUC-ROC: 0.9536
+
+Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.99      0.99      0.99      1808
+           1       0.93      0.88      0.90       192
+
+    accuracy                           0.98      2000
+   macro avg       0.96      0.93      0.95      2000
+weighted avg       0.98      0.98      0.98      2000
+
+</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p>SVM Linear Model Evaluation</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[34]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">svm_linear_model</span> <span class="o">=</span> <span class="n">trained_models</span><span class="p">[</span><span class="s1">&#39;SVM_linear&#39;</span><span class="p">]</span>
+<span class="n">evaluate_model</span><span class="p">(</span><span class="n">svm_linear_model</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output">
+<pre>Precision: 0.9643
+Recall: 0.8438
+F1 Score: 0.9000
+AUC-PR: 0.9282
+AUC-ROC: 0.9673
+
+Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.98      1.00      0.99      1808
+           1       0.96      0.84      0.90       192
+
+    accuracy                           0.98      2000
+   macro avg       0.97      0.92      0.95      2000
+weighted avg       0.98      0.98      0.98      2000
+
+</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p>SVM Poly Model Evaluation</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[35]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">svm_poly_model</span> <span class="o">=</span> <span class="n">trained_models</span><span class="p">[</span><span class="s1">&#39;SVM_poly&#39;</span><span class="p">]</span>
+<span class="n">evaluate_model</span><span class="p">(</span><span class="n">svm_poly_model</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output">
+<pre>Precision: 0.9647
+Recall: 0.8542
+F1 Score: 0.9061
+AUC-PR: 0.9351
+AUC-ROC: 0.9736
+
+Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.98      1.00      0.99      1808
+           1       0.96      0.85      0.91       192
+
+    accuracy                           0.98      2000
+   macro avg       0.97      0.93      0.95      2000
+weighted avg       0.98      0.98      0.98      2000
+
+</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p>SVM rbf Model Evaluation</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[36]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">svm_rbf_model</span> <span class="o">=</span> <span class="n">trained_models</span><span class="p">[</span><span class="s1">&#39;SVM_rbf&#39;</span><span class="p">]</span>
+<span class="n">evaluate_model</span><span class="p">(</span><span class="n">svm_rbf_model</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output">
+<pre>Precision: 0.9357
+Recall: 0.8333
+F1 Score: 0.8815
+AUC-PR: 0.9123
+AUC-ROC: 0.9584
+
+Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.98      0.99      0.99      1808
+           1       0.94      0.83      0.88       192
+
+    accuracy                           0.98      2000
+   macro avg       0.96      0.91      0.93      2000
+weighted avg       0.98      0.98      0.98      2000
+
+</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p>SVM sigmoid Model Evaluation</p>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[37]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">svm_sigmoid_model</span> <span class="o">=</span> <span class="n">trained_models</span><span class="p">[</span><span class="s1">&#39;SVM_sigmoid&#39;</span><span class="p">]</span>
+<span class="n">evaluate_model</span><span class="p">(</span><span class="n">svm_sigmoid_model</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output">
+<pre>Precision: 0.9586
+Recall: 0.8438
+F1 Score: 0.8975
+AUC-PR: 0.9253
+AUC-ROC: 0.9677
+
+Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.98      1.00      0.99      1808
+           1       0.96      0.84      0.90       192
+
+    accuracy                           0.98      2000
+   macro avg       0.97      0.92      0.94      2000
+weighted avg       0.98      0.98      0.98      2000
+
+</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p>SVM with polynomial kernel and kNN consistently performed well, while SVM with sigmoid kernel showed the most dramatic improvement post-optimisation. Decision Tree and SVM with linear kernel also benefited from tuning, demonstrating enhanced precision and balance across classes.</p>
+<h5><strong>Detailed Insights</strong><a rel="noopener" class="anchor-link" href="#Detailed-Insights">&#182;</a></h5><p><strong>Decision Tree:</strong></p>
+<ul>
+<li>The optimised model shows an improvement in precision and f1-score for the positive class, while maintaining high performance for the negative class. There is a noticeable increase in the macro average precision, recall, and f1-score, indicating better overall performance.</li>
+</ul>
+<p><strong>kNN:</strong></p>
+<ul>
+<li>The optimised model maintains its high performance, with slight improvements across all metrics. It continues to be one of the most reliable models for this dataset.</li>
+</ul>
+<p><strong>SVM Linear Kernel:</strong></p>
+<ul>
+<li>The optimised model maintains its high precision for the positive class but doesn&#39;t show significant improvement in recall. It remains a strong model, especially if precision is prioritised.</li>
+</ul>
+<p><strong>SVM Polynomial Kernel:</strong></p>
+<ul>
+<li>The optimised model shows improvement in recall for the positive class, leading to a higher f1-score. It strikes a good balance between precision and recall, making it one of the better models post-optimisation.</li>
+</ul>
+<p><strong>SVM RBF Kernel:</strong></p>
+<ul>
+<li>The optimised model maintains high performance, though there is a slight drop in precision for the positive class compared to the base model. Despite this, it remains one of the top-performing models.</li>
+</ul>
+<p><strong>SVM Sigmoid Kernel:</strong></p>
+<ul>
+<li>The optimised model shows a dramatic improvement, especially for the positive class, making it a viable option post-optimisation. It demonstrates the potential impact of hyperparameter tuning, particularly for models that may not perform well with default settings.</li>
+</ul>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<h3><strong>Task 5:</strong> Based on a filter technique, identify the three most discriminative features and the  three least discriminative features in this dataset. Run the SVM classifiers with the four  kernels on the top three and the bottom three features. How do the results compare? [10  marks]<a rel="noopener" class="anchor-link" href="#Task-5:-Based-on-a-filter-technique,-identify-the-three-most-discriminative-features-and-the--three-least-discriminative-features-in-this-dataset.-Run-the-SVM-classifiers-with-the-four--kernels-on-the-top-three-and-the-bottom-three-features.-How-do-the-results-compare?-[10--marks]">&#182;</a></h3>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[38]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.feature_selection</span> <span class="kn">import</span> <span class="n">f_classif</span>
+
+<span class="n">X</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;target_class&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;target_class&#39;</span><span class="p">]</span>
+<span class="c1"># use the f_classif function from sklearn.feature_selection to calculate the F-statistic for each feature.</span>
+<span class="n">f_statistic</span><span class="p">,</span> <span class="n">p_values</span> <span class="o">=</span> <span class="n">f_classif</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[39]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Rank the Features</span>
+<span class="n">feature_ranking</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s1">&#39;Feature&#39;</span><span class="p">:</span> <span class="n">X</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span>
+    <span class="s1">&#39;F-Statistic&#39;</span><span class="p">:</span> <span class="n">f_statistic</span><span class="p">,</span>
+    <span class="s1">&#39;P-Value&#39;</span><span class="p">:</span> <span class="n">p_values</span>
+<span class="p">})</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;F-Statistic&#39;</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[40]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Select the Top 3 and Bottom 3 Features</span>
+<span class="n">top_3_features</span> <span class="o">=</span> <span class="n">feature_ranking</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">3</span><span class="p">)[</span><span class="s1">&#39;Feature&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="n">bottom_3_features</span> <span class="o">=</span> <span class="n">feature_ranking</span><span class="o">.</span><span class="n">tail</span><span class="p">(</span><span class="mi">3</span><span class="p">)[</span><span class="s1">&#39;Feature&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[41]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># implement the SVM classifier with the top features and print the results</span>
+
+<span class="n">kernels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;poly&#39;</span><span class="p">,</span> <span class="s1">&#39;rbf&#39;</span><span class="p">,</span> <span class="s1">&#39;sigmoid&#39;</span><span class="p">]</span>
+
+<span class="k">for</span> <span class="n">kernel</span> <span class="ow">in</span> <span class="n">kernels</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;TOP 3 Features&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SVM with </span><span class="si">{</span><span class="n">kernel</span><span class="si">}</span><span class="s1"> kernel:&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># Top 3 Features</span>
+    <span class="n">X_top</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">top_3_features</span><span class="p">]</span>
+    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X_top</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Top 3 Features:&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">classification_report</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))</span>
+    
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output">
+<pre>TOP 3 Features
+SVM with linear kernel:
+Top 3 Features:
+              precision    recall  f1-score   support
+
+           0       0.98      1.00      0.99      1808
+           1       0.95      0.77      0.85       192
+
+    accuracy                           0.97      2000
+   macro avg       0.97      0.88      0.92      2000
+weighted avg       0.97      0.97      0.97      2000
+
+TOP 3 Features
+SVM with poly kernel:
+Top 3 Features:
+              precision    recall  f1-score   support
+
+           0       0.98      1.00      0.99      1808
+           1       0.97      0.80      0.88       192
+
+    accuracy                           0.98      2000
+   macro avg       0.98      0.90      0.93      2000
+weighted avg       0.98      0.98      0.98      2000
+
+TOP 3 Features
+SVM with rbf kernel:
+Top 3 Features:
+              precision    recall  f1-score   support
+
+           0       0.98      1.00      0.99      1808
+           1       0.97      0.84      0.90       192
+
+    accuracy                           0.98      2000
+   macro avg       0.98      0.92      0.94      2000
+weighted avg       0.98      0.98      0.98      2000
+
+TOP 3 Features
+SVM with sigmoid kernel:
+Top 3 Features:
+              precision    recall  f1-score   support
+
+           0       0.91      0.91      0.91      1808
+           1       0.18      0.18      0.18       192
+
+    accuracy                           0.84      2000
+   macro avg       0.55      0.55      0.55      2000
+weighted avg       0.84      0.84      0.84      2000
+
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p><strong>Top 3 Features</strong></p>
+<p><strong>Linear Kernel</strong></p>
+<ul>
+<li>High precision, recall, and F1-score for class 0 (not a pulsar).</li>
+<li>Reasonable performance for class 1 (pulsar), but with a noticeably lower recall.</li>
+<li>Overall accuracy is 97%, indicating a strong model.</li>
+</ul>
+<p><strong>Polynomial Kernel</strong></p>
+<ul>
+<li>Similar to the linear kernel, but with slightly improved performance for class 1.</li>
+<li>Recall for class 1 is now 80%, a notable improvement.</li>
+<li>Overall accuracy is 98%.</li>
+</ul>
+<p><strong>RBF Kernel</strong></p>
+<ul>
+<li>Further improvement for class 1, with a recall of 84%.</li>
+<li>The model maintains high precision and F1-score across both classes.</li>
+<li>Overall accuracy remains high at 98%.</li>
+</ul>
+<p><strong>Sigmoid Kernel</strong></p>
+<ul>
+<li>Significant drop in performance, especially for class 1.</li>
+<li>Precision, recall, and F1-score for class 1 are much lower compared to other kernels.</li>
+<li>Overall accuracy is 84%, the lowest among the top 3 features classifiers.</li>
+</ul>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[42]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># bottom features and show results</span>
+<span class="k">for</span> <span class="n">kernel</span> <span class="ow">in</span> <span class="n">kernels</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Bottom 3 Features&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;SVM with </span><span class="si">{</span><span class="n">kernel</span><span class="si">}</span><span class="s1"> kernel:&#39;</span><span class="p">)</span>
+    <span class="c1"># Bottom 3 Features</span>
+    <span class="n">X_bottom</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">bottom_3_features</span><span class="p">]</span>
+    <span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X_bottom</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="n">kernel</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Bottom 3 Features:&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">classification_report</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-&#39;</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output">
+<pre>Bottom 3 Features
+SVM with linear kernel:
+Bottom 3 Features:
+              precision    recall  f1-score   support
+
+           0       0.96      0.99      0.97      1808
+           1       0.88      0.57      0.69       192
+
+    accuracy                           0.95      2000
+   macro avg       0.92      0.78      0.83      2000
+weighted avg       0.95      0.95      0.95      2000
+
+--------------------------------------------------
+Bottom 3 Features
+SVM with poly kernel:
+Bottom 3 Features:
+              precision    recall  f1-score   support
+
+           0       0.96      0.99      0.97      1808
+           1       0.90      0.56      0.69       192
+
+    accuracy                           0.95      2000
+   macro avg       0.93      0.78      0.83      2000
+weighted avg       0.95      0.95      0.95      2000
+
+--------------------------------------------------
+Bottom 3 Features
+SVM with rbf kernel:
+Bottom 3 Features:
+              precision    recall  f1-score   support
+
+           0       0.96      0.99      0.98      1808
+           1       0.90      0.58      0.71       192
+
+    accuracy                           0.95      2000
+   macro avg       0.93      0.79      0.84      2000
+weighted avg       0.95      0.95      0.95      2000
+
+--------------------------------------------------
+Bottom 3 Features
+SVM with sigmoid kernel:
+Bottom 3 Features:
+              precision    recall  f1-score   support
+
+           0       0.91      0.93      0.92      1808
+           1       0.18      0.16      0.17       192
+
+    accuracy                           0.85      2000
+   macro avg       0.55      0.54      0.54      2000
+weighted avg       0.84      0.85      0.85      2000
+
+--------------------------------------------------
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p><strong>Bottom 3 Features</strong></p>
+<p><strong>Linear Kernel</strong></p>
+<ul>
+<li>Decent performance for class 0, but a drop in recall for class 1 to 57%.</li>
+<li>Precision for class 1 is also lower compared to the top 3 features.</li>
+<li>Overall accuracy is 95%.</li>
+</ul>
+<p><strong>Polynomial Kernel</strong></p>
+<ul>
+<li>Similar performance to the linear kernel for the bottom 3 features.</li>
+<li>Slight improvement in precision for class 1.</li>
+<li>Overall accuracy remains at 95%.</li>
+</ul>
+<p><strong>RBF Kernel</strong></p>
+<ul>
+<li>Comparable performance to the polynomial kernel.</li>
+<li>Recall for class 1 is at 58%, indicating challenges in correctly identifying pulsars.</li>
+<li>Overall accuracy is 95%.</li>
+</ul>
+<p><strong>Sigmoid Kernel</strong></p>
+<ul>
+<li>A drop in performance similar to the top 3 features, but not as severe.</li>
+<li>Precision and recall for class 1 are low, affecting the F1-score.</li>
+<li>Overall accuracy is 85%.</li>
+</ul>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<h4><strong>Insights</strong><a rel="noopener" class="anchor-link" href="#Insights">&#182;</a></h4><ul>
+<li>The SVM classifiers trained on the top 3 features generally perform better than those trained on the bottom 3 features, particularly for identifying pulsars (class 1).</li>
+<li>The RBF kernel appears to be the most effective for this task, achieving the highest recall for class 1 when using the top 3 features.</li>
+<li>The sigmoid kernel consistently shows lower performance, especially in terms of precision and recall for class 1, indicating it may not be the best choice for this dataset and problem.</li>
+</ul>
+<p>These results highlight the importance of feature selection in building effective models, as the top features enabled models to achieve higher accuracy and better balanced performance across both classes.</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<h3><strong>Task 6:</strong> Carefully identify the most discriminating features to predict the binary outcome of  the dataset using one wrapper feature selection technique. This should be done for each of  the decision tree, kNN and four SVM classifiers from part Task 4. Report and discuss the  differences between the feature subsets produced by the filter (Task 5) and the wrapper  technique.<a rel="noopener" class="anchor-link" href="#Task-6:-Carefully-identify-the-most-discriminating-features-to-predict-the-binary-outcome-of--the-dataset-using-one-wrapper-feature-selection-technique.-This-should-be-done-for-each-of--the-decision-tree,-kNN-and-four-SVM-classifiers-from-part-Task-4.-Report-and-discuss-the--differences-between-the-feature-subsets-produced-by-the-filter-(Task-5)-and-the-wrapper--technique.">&#182;</a></h3>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[43]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">sklearn.feature_selection</span> <span class="kn">import</span> <span class="n">RFE</span>
+
+
+<span class="c1"># Define classifiers</span>
+<span class="n">models</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;Decision Tree&#39;</span><span class="p">:</span> <span class="n">DecisionTreeClassifier</span><span class="p">(),</span>
+    <span class="s1">&#39;kNN&#39;</span><span class="p">:</span> <span class="n">KNeighborsClassifier</span><span class="p">(),</span>
+    <span class="s1">&#39;SVM Linear&#39;</span><span class="p">:</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;SVM RBF&#39;</span><span class="p">:</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s1">&#39;rbf&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;SVM Poly&#39;</span><span class="p">:</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s1">&#39;poly&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;SVM Sigmoid&#39;</span><span class="p">:</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s1">&#39;sigmoid&#39;</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[44]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Applying RFE</span>
+<span class="n">num_features_to_select</span> <span class="o">=</span> <span class="mi">3</span>
+
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">selector</span> <span class="o">=</span> <span class="n">RFE</span><span class="p">(</span><span class="n">estimator</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">n_features_to_select</span><span class="o">=</span><span class="n">num_features_to_select</span><span class="p">)</span>
+    <span class="n">selector</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+    <span class="n">X_train_rfe</span> <span class="o">=</span> <span class="n">selector</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="n">X_test_rfe</span> <span class="o">=</span> <span class="n">selector</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+    
+    <span class="n">model</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train_rfe</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test_rfe</span><span class="p">)</span>
+    
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-&#39;</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> model:&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Selected Features:&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">X_train</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">X_train</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="s2">&quot;Selected&quot;</span> <span class="k">if</span> <span class="n">selector</span><span class="o">.</span><span class="n">support_</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">else</span> <span class="s2">&quot;Not Selected&quot;</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Feature Ranking:&#39;</span><span class="p">,</span> <span class="n">selector</span><span class="o">.</span><span class="n">ranking_</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;-&#39;</span> <span class="o">*</span> <span class="mi">50</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> model:&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Classification Report:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">classification_report</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Accuracy:&#39;</span><span class="p">,</span> <span class="n">accuracy_score</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output">
+<pre>--------------------------------------------------
+Decision Tree model:
+Selected Features:
+kurtosis_dm_snr_curve: Selected
+std_deviation_integrated_profile: Selected
+skewness_dm_snr_curve: Selected
+Feature Ranking: [1 1 1]
+--------------------------------------------------
+Decision Tree model:
+Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.97      0.96      0.97      1808
+           1       0.67      0.68      0.68       192
+
+    accuracy                           0.94      2000
+   macro avg       0.82      0.82      0.82      2000
+weighted avg       0.94      0.94      0.94      2000
+
+Accuracy: 0.9375
+--------------------------------------------------
+kNN model:
+Selected Features:
+kurtosis_dm_snr_curve: Selected
+std_deviation_integrated_profile: Selected
+skewness_dm_snr_curve: Selected
+Feature Ranking: [1 1 1]
+--------------------------------------------------
+kNN model:
+Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.96      0.98      0.97      1808
+           1       0.79      0.61      0.69       192
+
+    accuracy                           0.95      2000
+   macro avg       0.87      0.80      0.83      2000
+weighted avg       0.94      0.95      0.94      2000
+
+Accuracy: 0.947
+--------------------------------------------------
+SVM Linear model:
+Selected Features:
+kurtosis_dm_snr_curve: Selected
+std_deviation_integrated_profile: Selected
+skewness_dm_snr_curve: Selected
+Feature Ranking: [1 1 1]
+--------------------------------------------------
+SVM Linear model:
+Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.96      0.99      0.97      1808
+           1       0.88      0.57      0.69       192
+
+    accuracy                           0.95      2000
+   macro avg       0.92      0.78      0.83      2000
+weighted avg       0.95      0.95      0.95      2000
+
+Accuracy: 0.9515
+--------------------------------------------------
+SVM RBF model:
+Selected Features:
+kurtosis_dm_snr_curve: Selected
+std_deviation_integrated_profile: Selected
+skewness_dm_snr_curve: Selected
+Feature Ranking: [1 1 1]
+--------------------------------------------------
+SVM RBF model:
+Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.96      0.99      0.98      1808
+           1       0.90      0.58      0.71       192
+
+    accuracy                           0.95      2000
+   macro avg       0.93      0.79      0.84      2000
+weighted avg       0.95      0.95      0.95      2000
+
+Accuracy: 0.954
+--------------------------------------------------
+SVM Poly model:
+Selected Features:
+kurtosis_dm_snr_curve: Selected
+std_deviation_integrated_profile: Selected
+skewness_dm_snr_curve: Selected
+Feature Ranking: [1 1 1]
+--------------------------------------------------
+SVM Poly model:
+Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.96      0.99      0.97      1808
+           1       0.90      0.56      0.69       192
+
+    accuracy                           0.95      2000
+   macro avg       0.93      0.78      0.83      2000
+weighted avg       0.95      0.95      0.95      2000
+
+Accuracy: 0.952
+--------------------------------------------------
+SVM Sigmoid model:
+Selected Features:
+kurtosis_dm_snr_curve: Selected
+std_deviation_integrated_profile: Selected
+skewness_dm_snr_curve: Selected
+Feature Ranking: [1 1 1]
+--------------------------------------------------
+SVM Sigmoid model:
+Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.91      0.93      0.92      1808
+           1       0.18      0.16      0.17       192
+
+    accuracy                           0.85      2000
+   macro avg       0.55      0.54      0.54      2000
+weighted avg       0.84      0.85      0.85      2000
+
+Accuracy: 0.852
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p><strong>Wrapper Method (Using RFE with Different Classifiers):</strong></p>
+<p><strong>Decision Tree, kNN, All SVM Kernels:</strong></p>
+<ul>
+<li>Selected Features: <ul>
+<li>kurtosis_dm_snr_curve, </li>
+<li>std_deviation_integrated_profile, </li>
+<li>skewness_dm_snr_curve</li>
+</ul>
+</li>
+<li>Accuracy Ranges: 0.852 (SVM Sigmoid) to 0.954 (SVM RBF)</li>
+</ul>
+<p><strong>Filter Method:</strong></p>
+<p>Top 3 Features for SVM with Different Kernels</p>
+<ul>
+<li>&#39;kurtosis_integrated_profile&#39;</li>
+<li>&#39;skewness_integrated_profile&#39;</li>
+<li>&#39;mean_integrated_profile&#39;</li>
+</ul>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<h4><strong>Discussion</strong><a rel="noopener" class="anchor-link" href="#Discussion">&#182;</a></h4><p>The wrapper method selected features predominantly from the DM-SNR curve, while the filter method selected features from the integrated profile.
+This difference highlights the variability that can occur in feature selection based on the method used. The integrated profile and DM-SNR curve describe different aspects of the pulsar stars, and it appears that the two methods have found different sets of features to be more indicative of the binary outcome.</p>
+<p>The accuracy ranges show that SVM with RBF kernel and SVM with Linear kernel performed best among all the classifiers after feature selection using the wrapper method.</p>
+<p>The filter method results show a very high performance for SVM with different kernels maintaining overall higher accuracies.</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<h3><strong>Task 7:</strong> Compare the performance of different classifiers using the different feature  subsets found in Tasks 5 and 6 and compare it to the results on original dataset that you  reported in Task 4. Have the results improved or worsened after feature selection? Is the  relative performance of different classifiers and configuration settings in line with your expectation?  [10 marks]<a rel="noopener" class="anchor-link" href="#Task-7:-Compare-the-performance-of-different-classifiers-using-the-different-feature--subsets-found-in-Tasks-5-and-6-and-compare-it-to-the-results-on-original-dataset-that-you--reported-in-Task-4.-Have-the-results-improved-or-worsened-after-feature-selection?-Is-the--relative-performance-of-different-classifiers-and-configuration-settings-in-line-with-your-expectation?--[10-marks]">&#182;</a></h3>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[45]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;target_class&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;target_class&#39;</span><span class="p">]</span>
+
+<span class="c1"># Define models</span>
+<span class="n">models</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;Decision Tree&#39;</span><span class="p">:</span> <span class="n">DecisionTreeClassifier</span><span class="p">(),</span>
+    <span class="s1">&#39;k-Nearest Neighbors&#39;</span><span class="p">:</span> <span class="n">KNeighborsClassifier</span><span class="p">(),</span>
+    <span class="s1">&#39;SVM Linear&#39;</span><span class="p">:</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;SVM Polynomial&#39;</span><span class="p">:</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s1">&#39;poly&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;SVM RBF&#39;</span><span class="p">:</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s1">&#39;rbf&#39;</span><span class="p">),</span>
+    <span class="s1">&#39;SVM Sigmoid&#39;</span><span class="p">:</span> <span class="n">SVC</span><span class="p">(</span><span class="n">kernel</span><span class="o">=</span><span class="s1">&#39;sigmoid&#39;</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="c1"># Features selected by Wrapper Method</span>
+<span class="n">wrapper_features</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;kurtosis_dm_snr_curve&#39;</span><span class="p">,</span> <span class="s1">&#39;std_deviation_integrated_profile&#39;</span><span class="p">,</span> <span class="s1">&#39;skewness_dm_snr_curve&#39;</span><span class="p">]</span>
+<span class="n">X_train_wrapper</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">[</span><span class="n">wrapper_features</span><span class="p">]</span>
+<span class="n">X_test_wrapper</span> <span class="o">=</span> <span class="n">X_test</span><span class="p">[</span><span class="n">wrapper_features</span><span class="p">]</span>
+
+<span class="c1"># Evaluate models on the dataset with features selected by the wrapper method</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Results on Wrapper Method Selected Features:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">clf</span> <span class="ow">in</span> <span class="n">models</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train_wrapper</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test_wrapper</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> Results:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">classification_report</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output">
+<pre>Results on Wrapper Method Selected Features:
+
+Decision Tree Results:
+              precision    recall  f1-score   support
+
+           0       0.97      0.96      0.96      1808
+           1       0.65      0.68      0.66       192
+
+    accuracy                           0.93      2000
+   macro avg       0.81      0.82      0.81      2000
+weighted avg       0.94      0.93      0.93      2000
+
+
+k-Nearest Neighbors Results:
+              precision    recall  f1-score   support
+
+           0       0.96      0.98      0.97      1808
+           1       0.79      0.61      0.69       192
+
+    accuracy                           0.95      2000
+   macro avg       0.87      0.80      0.83      2000
+weighted avg       0.94      0.95      0.94      2000
+
+
+SVM Linear Results:
+              precision    recall  f1-score   support
+
+           0       0.96      0.99      0.97      1808
+           1       0.88      0.57      0.69       192
+
+    accuracy                           0.95      2000
+   macro avg       0.92      0.78      0.83      2000
+weighted avg       0.95      0.95      0.95      2000
+
+
+SVM Polynomial Results:
+              precision    recall  f1-score   support
+
+           0       0.96      0.99      0.97      1808
+           1       0.90      0.56      0.69       192
+
+    accuracy                           0.95      2000
+   macro avg       0.93      0.78      0.83      2000
+weighted avg       0.95      0.95      0.95      2000
+
+
+SVM RBF Results:
+              precision    recall  f1-score   support
+
+           0       0.96      0.99      0.98      1808
+           1       0.90      0.58      0.71       192
+
+    accuracy                           0.95      2000
+   macro avg       0.93      0.79      0.84      2000
+weighted avg       0.95      0.95      0.95      2000
+
+
+SVM Sigmoid Results:
+              precision    recall  f1-score   support
+
+           0       0.91      0.93      0.92      1808
+           1       0.18      0.16      0.17       192
+
+    accuracy                           0.85      2000
+   macro avg       0.55      0.54      0.54      2000
+weighted avg       0.84      0.85      0.85      2000
+
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[46]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">X</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;target_class&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;target_class&#39;</span><span class="p">]</span>
+
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[47]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Features selected by Filter Method</span>
+<span class="n">filter_features</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;kurtosis_integrated_profile&#39;</span><span class="p">,</span> <span class="s1">&#39;skewness_integrated_profile&#39;</span><span class="p">,</span> <span class="s1">&#39;mean_integrated_profile&#39;</span><span class="p">]</span>
+<span class="n">X_train_filter</span> <span class="o">=</span> <span class="n">X_train</span><span class="p">[</span><span class="n">filter_features</span><span class="p">]</span>
+<span class="n">X_test_filter</span> <span class="o">=</span> <span class="n">X_test</span><span class="p">[</span><span class="n">filter_features</span><span class="p">]</span>
+
+<span class="c1"># Evaluate models on the dataset with features selected by the filter method</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Results on Filter Method Selected Features:&quot;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">clf</span> <span class="ow">in</span> <span class="n">models</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">clf</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train_filter</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+    <span class="n">y_pred</span> <span class="o">=</span> <span class="n">clf</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test_filter</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> Results:&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">classification_report</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="n">y_pred</span><span class="p">))</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output">
+<pre>Results on Filter Method Selected Features:
+
+Decision Tree Results:
+              precision    recall  f1-score   support
+
+           0       0.98      0.97      0.98      1808
+           1       0.78      0.86      0.82       192
+
+    accuracy                           0.96      2000
+   macro avg       0.88      0.92      0.90      2000
+weighted avg       0.97      0.96      0.96      2000
+
+
+k-Nearest Neighbors Results:
+              precision    recall  f1-score   support
+
+           0       0.99      0.99      0.99      1808
+           1       0.91      0.87      0.89       192
+
+    accuracy                           0.98      2000
+   macro avg       0.95      0.93      0.94      2000
+weighted avg       0.98      0.98      0.98      2000
+
+
+SVM Linear Results:
+              precision    recall  f1-score   support
+
+           0       0.98      1.00      0.99      1808
+           1       0.95      0.77      0.85       192
+
+    accuracy                           0.97      2000
+   macro avg       0.97      0.88      0.92      2000
+weighted avg       0.97      0.97      0.97      2000
+
+
+SVM Polynomial Results:
+              precision    recall  f1-score   support
+
+           0       0.98      1.00      0.99      1808
+           1       0.97      0.80      0.88       192
+
+    accuracy                           0.98      2000
+   macro avg       0.98      0.90      0.93      2000
+weighted avg       0.98      0.98      0.98      2000
+
+
+SVM RBF Results:
+              precision    recall  f1-score   support
+
+           0       0.98      1.00      0.99      1808
+           1       0.97      0.84      0.90       192
+
+    accuracy                           0.98      2000
+   macro avg       0.98      0.92      0.94      2000
+weighted avg       0.98      0.98      0.98      2000
+
+
+SVM Sigmoid Results:
+              precision    recall  f1-score   support
+
+           0       0.91      0.91      0.91      1808
+           1       0.18      0.18      0.18       192
+
+    accuracy                           0.84      2000
+   macro avg       0.55      0.55      0.55      2000
+weighted avg       0.84      0.84      0.84      2000
+
+</pre>
+</div>
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p><strong>Results Comparison of Original Data, Wrapper Method Selected Features Data, and Filter Method Selected Features Data:</strong></p>
+<ul>
+<li>Feature selection has led to varied results. The wrapper method seems to have adversely affected the classifiers more than the filter method.</li>
+<li>For SVM, the linear, polynomial, and RBF kernels maintain good performance even after feature selection, but the sigmoid kernel shows a significant drop.</li>
+<li>The relative performance of different classifiers and configuration settings seems to be in line with expectations, as simpler models like decision trees are more affected by the reduction in features, while complex models like SVM maintain performance to a certain extent.</li>
+<li>The results after feature selection might have worsened in some cases, but this could be due to the reduced dimensionality leading to loss of information. The feature selection methods might have removed features that were crucial for making accurate predictions.</li>
+<li>It&#39;s also worth noting that the classes are imbalanced, with class 0 (non-pulsar) being much more prevalent than class 1 (pulsar). This might have affected the classifiers&#39; ability to correctly classify the minority class after feature selection. Balancing the dataset or using different evaluation metrics like the area under the ROC curve (AUC-ROC) might provide more insight into the models&#39; performance.</li>
+</ul>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<h3><strong>Task 8:</strong> Plot the ROC curves for the &quot;1&quot; class and the different classification models. What  do you learn from this ROC curve? Which classifier/configuration is best suited for this  task? Are you satisfied with the performance? [15 marks]<a rel="noopener" class="anchor-link" href="#Task-8:-Plot-the-ROC-curves-for-the-&quot;1&quot;-class-and-the-different-classification-models.-What--do-you-learn-from-this-ROC-curve?-Which-classifier/configuration-is-best-suited-for-this--task?-Are-you-satisfied-with-the-performance?-[15-marks]">&#182;</a></h3>
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<p>Based on the ROC curves and AUC scores of the models on full Data it&#39;s clear that:</p>
+<ul>
+<li>SVM Poly Model shows the best overall performance for this problem. It is plotted above for all models using the evaluation function</li>
+</ul>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[48]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Train the optimised SVM model again on full data with optimised hyperparameters again to reproduce roc curve</span>
+<span class="n">svm_poly_pipeline</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="p">[</span>
+    <span class="p">(</span><span class="s1">&#39;classifier&#39;</span><span class="p">,</span> <span class="n">SVC</span><span class="p">(</span><span class="n">C</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">coef0</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">degree</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">kernel</span><span class="o">=</span><span class="s1">&#39;poly&#39;</span><span class="p">,</span> <span class="n">probability</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">42</span><span class="p">,</span> <span class="n">tol</span><span class="o">=</span><span class="mf">0.0001</span><span class="p">))</span>
+<span class="p">])</span>
+
+<span class="n">svm_poly_pipeline</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[48]:</div>
+
+
+
+
+<div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult">
+<pre>Pipeline(steps=[(&#39;classifier&#39;,
+                 SVC(C=10, coef0=2, degree=2, kernel=&#39;poly&#39;, probability=True,
+                     random_state=42, tol=0.0001))])</pre>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[49]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">evaluate_model</span><span class="p">(</span><span class="n">model</span><span class="o">=</span><span class="n">svm_poly_pipeline</span><span class="p">,</span> <span class="n">X_test</span><span class="o">=</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="o">=</span><span class="n">y_test</span><span class="p">)</span>
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+<div class="jp-Cell-outputWrapper">
+
+
+<div class="jp-OutputArea jp-Cell-outputArea">
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+<div class="jp-RenderedText jp-OutputArea-output">
+<pre>Precision: 0.9647
+Recall: 0.8542
+F1 Score: 0.9061
+AUC-PR: 0.9351
+AUC-ROC: 0.9736
+
+Classification Report:
+               precision    recall  f1-score   support
+
+           0       0.98      1.00      0.99      1808
+           1       0.96      0.85      0.91       192
+
+    accuracy                           0.98      2000
+   macro avg       0.97      0.93      0.95      2000
+weighted avg       0.98      0.98      0.98      2000
+
+</pre>
+</div>
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+<div class="jp-OutputArea-child">
+
+    
+    <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+
+
+
+
+<div class="jp-RenderedImage jp-OutputArea-output">
+<img src="javascript://"/>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput">
+<ul>
+<li>The ROC curve is very close to the top left corner, which indicates a very good performance of the classifier.</li>
+<li>The Area Under the Curve (AUC) is 0.9736, which is close to 1. This is an excellent score, suggesting that the classifier has a high ability to distinguish between positive (pulsar stars) and negative classes (noises, interferences, etc.).</li>
+<li>The AUC of 0.9736 indicates an excellent performance. Such a high AUC suggests that the model is capturing the underlying patterns well and can differentiate effectively between the classes. Therefore, from the information provided, I&#39;m satisfied with the performance of this classifier on the given task.</li>
+</ul>
+
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper">
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In&#160;[&#160;]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor">
+     <div class="CodeMirror cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span> 
+</pre></div>
+
+     </div>
+</div>
+</div>
+</div>
+
+</div>
+
+
+
+
+
+
+
+
+
+<script type="module" src="https://s.brightspace.com/lib/bsi/2024.6.211/unbundled/mathjax.js"></script><script type="text/javascript">document.addEventListener('DOMContentLoaded', function() {
+					if (document.querySelector('math') || /\$\$|\\\(|\\\[|\\begin{|\\ref{|\\eqref{/.test(document.body.innerHTML)) {
+						document.querySelectorAll('mspace[linebreak="newline"]').forEach(elm => {
+							elm.setAttribute('style', 'display: block; height: 0.5rem;');
+						});
+
+						window.D2L.MathJax.loadMathJax({
+							outputScale: 1.5,
+							renderLatex: true,
+							enableMML3Support: false
+						});
+					}
+				});</script><script type="module" src="https://s.brightspace.com/lib/bsi/2024.6.211/unbundled/prism.js"></script><script type="text/javascript">document.addEventListener('DOMContentLoaded', function() {
+					document.querySelectorAll('.d2l-code').forEach(code => {
+						window.D2L.Prism.formatCodeElement(code);
+					});
+				});</script><script type="module" src="https://s.brightspace.com/lib/bsi/2024.6.211/unbundled/embeds.js"></script><script type="text/javascript">document.addEventListener('DOMContentLoaded', function() {
+					window.D2L.EmbedRenderer.renderEmbeds(document.body);
+				});</script></body></html>
